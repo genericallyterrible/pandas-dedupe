@@ -130,9 +130,9 @@ pandas_dedupe.dedupe_dataframe(df,[('first_name', 'String', 'crf'), 'last_name',
 
 # Types
 
-Dedupe supports a variety of datatypes; a full list with documentation can be found [here.](https://docs.dedupe.io/en/latest/Variable-definition.html#)
+Dedupe supports a variety of variable types; a full list with documentation can be found [here.](https://docs.dedupe.io/en/latest/Variable-definition.html#)
 
-pandas-dedupe officially supports the following datatypes:
+pandas-dedupe officially supports the following variable types:
 
 - **String** - Standard string comparison using string distance metric. This is the default type.
 - **Text** - Comparison for sentences or paragraphs of text. Uses cosine similarity metric.
@@ -147,14 +147,16 @@ pandas-dedupe officially supports the following datatypes:
 - **Exact** - Tests whether fields are an exact match.
 - **Exists** - Sometimes, the presence or absence of data can be useful in predicting a match.
   The Exists type tests for whether both, one, or neither of fields are null.
-**Categorical** Comparison for qualitative type of things.
+- **Categorical** - Comparison for qualitatively different types of things.
+- **Custom** - For passing a custom comparison function to dedupe.
 
 Additional supported parameters are:
 
 - **has missing** - Can be used if one of your data fields contains null values
 - **crf** - Use conditional random fields for comparisons rather than distance metric. May be more
   accurate in some cases, but runs much slower. Works with String and ShortString types.
-- **categories** - categories in the form of a python list if type of data has been specified as `Categorical`.
+- **categories** - Categories in the form of a python list if variable type has been specified as `Categorical`.
+- **comparator** - A custom comparison function that can take in two field values and return a number if variable type has been specified as `Custom`.
 
 # Contributors
 

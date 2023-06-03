@@ -23,13 +23,15 @@ def clean_punctuation(df):
 
 def select_fields(fields, field_properties):
     for i in field_properties:
-        if type(i)==str:
+        if type(i) == str:
             fields.append({'field': i, 'type': 'String'})
-        elif len(i)==2:
+        elif len(i) == 2:
             fields.append({'field': i[0], 'type': i[1]})
-        elif len(i)==3:
-            if i[1]=='Categorical':
+        elif len(i) == 3:
+            if i[1] == 'Categorical':
                 fields.append({'field': i[0], 'type': i[1], 'categories': i[2]})
+            elif i[1] == 'Custom':
+                fields.append({'field': i[0], 'type': i[1], 'comparator': i[2]})
             elif i[2] == 'has missing':
                 fields.append({'field': i[0], 'type': i[1], 'has missing': True})
             elif i[2] == 'crf':
