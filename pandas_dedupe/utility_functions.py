@@ -37,7 +37,7 @@ def select_fields(fields, field_properties):
             elif i[2] == 'crf':
                 fields.append({'field': i[0], 'type': i[1], 'crf': True})
             else:
-                raise Exception(i[2] + " is not a valid field property")
+                raise Exception(f"'{i[2]}' is not a valid field property")
                 
     
 def latlong_datatype(x):
