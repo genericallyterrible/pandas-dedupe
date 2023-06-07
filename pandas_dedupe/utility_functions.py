@@ -6,7 +6,7 @@ from ast import literal_eval
 def trim(x):
     x = x.split()
     x = ' '.join(x)
-    return x   
+    return x
 
 
 def clean_punctuation(df):
@@ -35,8 +35,8 @@ def select_fields(fields, field_properties):
                 fields.append({'field': i[0], 'type': i[1], 'crf': True})
             else:
                 raise Exception(f"'{i[2]}' is not a valid field property")
-                
-    
+
+
 def latlong_datatype(x):
     if x is None:
         return None
@@ -49,8 +49,8 @@ def latlong_datatype(x):
             return k, v
         except:
             raise Exception("Make sure that LatLong columns are tuples arranged like ('lat', 'lon')")
-            
-            
+
+
 def specify_type(df, field_properties):
     for i in field_properties:
         if i[1] == 'LatLong':
@@ -63,4 +63,4 @@ def specify_type(df, field_properties):
                 df[i[0]] = df[i[0]].replace({np.nan: None})
             except:
                 raise Exception('Make sure that Price columns can be converted to float.')
- 
+

@@ -23,7 +23,7 @@ def _active_learning(clean_data, messy_data, sample_size, deduper, training_file
         clean_data : dict
             The dictionary form of the gazette that gazetteer_dedupe requires.
         messy_data : dict
-            The dictionary form of the messy data that needs to be deduplicated 
+            The dictionary form of the messy data that needs to be deduplicated
             (and canonicalized)
         sample_size : float, default 0.3
             Specify the sample size used for training as a float from 0 to 1.
@@ -34,7 +34,7 @@ def _active_learning(clean_data, messy_data, sample_size, deduper, training_file
             from.
         settings_file : str
             A path to a settings file that will be loaded if it exists.
-            
+
         Returns
         -------
         dedupe.Gazetteer
@@ -59,7 +59,7 @@ def _active_learning(clean_data, messy_data, sample_size, deduper, training_file
     # Save our weights and predicates to disk.
     with open(settings_file, 'wb') as sf:
         deduper.write_settings(sf)
-    
+
     return deduper
 
 def _train(settings_file, training_file, clean_data, messy_data, field_properties, sample_size, update_model, n_cores):
@@ -75,7 +75,7 @@ def _train(settings_file, training_file, clean_data, messy_data, field_propertie
         clean_data : dict
             The dictionary form of the gazette that gazetteer_dedupe requires.
         messy_data : dict
-            The dictionary form of the messy data that needs to be deduplicated 
+            The dictionary form of the messy data that needs to be deduplicated
             (and canonicalized)
         field_properties : dict
             The mapping of fields to their respective data types. Please
@@ -97,23 +97,23 @@ def _train(settings_file, training_file, clean_data, messy_data, field_propertie
     # Define the fields dedupe will pay attention to
     fields = []
     select_fields(fields, [field_properties])
-    
+
     if update_model == False:
-        
+
         # If a settings file already exists, we'll just load that and skip training
         if os.path.exists(settings_file):
             print('Reading from', settings_file)
             with open(settings_file, 'rb') as f:
                 deduper = dedupe.StaticGazetteer(f, num_cores=n_cores)
-        
+
         #Create a new deduper object and pass our data model to it.
         else:
             # Initialise dedupe
             deduper = dedupe.Gazetteer(fields, num_cores=n_cores)
-            
+
             # Launch active learning
             deduper = _active_learning(clean_data, messy_data, sample_size, deduper, training_file, settings_file)
-            
+
     else:
         # ## Training
         # Initialise dedupe
@@ -139,7 +139,7 @@ def _cluster(deduper, clean_data, messy_data, threshold, canonicalize):
         clean_data : dict
             The dictionary form of the gazette that gazetteer_dedupe requires.
         messy_data : dict
-            The dictionary form of the messy data that needs to be deduplicated 
+            The dictionary form of the messy data that needs to be deduplicated
             (and canonicalized)
         threshold : dedupe.Threshold
             The threshold used for clustering.
@@ -153,8 +153,8 @@ def _cluster(deduper, clean_data, messy_data, threshold, canonicalize):
     """
     # ## Clustering
     print('Clustering...')
-    deduper.index(clean_data)                       
-    
+    deduper.index(clean_data)
+
     clustered_dupes = deduper.search(messy_data, threshold, n_matches=None, generator=False)
     print('# duplicate sets', len(clustered_dupes))
 
@@ -166,19 +166,19 @@ def _cluster(deduper, clean_data, messy_data, threshold, canonicalize):
                 pass
             else:
                 i[key] = str(i[key])
-    
+
     df_data = []
-    # ## Writing Results    
+    # ## Writing Results
     for _, (messy_id, matches) in enumerate(clustered_dupes):
         for canon_id, scores in matches:
-            
+
             tmp = {
                 'cluster id': canon_id,
-                'confidence': scores, 
+                'confidence': scores,
                 'record id': messy_id
             }
             df_data.append(tmp)
-    
+
     # Add canonical name
     if canonicalize:
         clean_data_dict = pd.DataFrame.from_dict(clean_data).T.add_prefix('canonical_')
@@ -191,13 +191,13 @@ def _cluster(deduper, clean_data, messy_data, threshold, canonicalize):
         clustered_df = (pd.DataFrame.from_dict(df_data)        # Create clustered results dataframe
                         .set_index('record id')                # Note: record id is the index of messy_data
                        )
-                        
+
     # Drop duplicates (i.e. keep canonical name with max confidence)
     # Note: the reason for this is that gazetteer dedupe might assign the same obs to multiple clusters
     confidence_maxes = clustered_df.groupby([clustered_df.index])['confidence'].transform(max) # Calculate max confidence
-    clustered_df = clustered_df.loc[clustered_df['confidence'] == confidence_maxes]   # Keep rows with max confidence 
+    clustered_df = clustered_df.loc[clustered_df['confidence'] == confidence_maxes]   # Keep rows with max confidence
     clustered_df = clustered_df.loc[~clustered_df.index.duplicated(keep='first')]     # If same confidence keep the first obs
-                   
+
     return clustered_df
 
 
@@ -223,9 +223,9 @@ def gazetteer_dataframe(clean_data, messy_data, field_properties, canonicalize=F
             Note: the name of the training file should include the .json extension.
         update_model : bool, default False
             If True, it allows user to update existing model by uploading
-            training file. 
+            training file.
         threshold : float, default 0.3
-           only consider put together records into clusters if the cophenetic similarity of the cluster 
+           only consider put together records into clusters if the cophenetic similarity of the cluster
            is greater than the threshold.
         sample_size : float, default 0.3
             Specify the sample size used for training as a float from 0 to 1.
@@ -240,7 +240,7 @@ def gazetteer_dataframe(clean_data, messy_data, field_properties, canonicalize=F
             score. Optionally, it will contain canonicalized columns for all
             attributes of the record.
     """
-    # Import Data  
+    # Import Data
     config_name = config_name.replace(" ", "_")
 
     settings_file = config_name + '_learned_settings'
@@ -253,29 +253,29 @@ def gazetteer_dataframe(clean_data, messy_data, field_properties, canonicalize=F
 
     # Common column name
     common_name = clean_data.columns[0]
-    
+
     # Canonical dataset (i.e. gazette)
     df_canonical = clean_punctuation(clean_data)
     df_canonical.rename(columns={field_properties: common_name}, inplace=True)
-    specify_type(df_canonical, [common_name])                
-    
+    specify_type(df_canonical, [common_name])
+
     df_canonical['dictionary'] = df_canonical.apply(
         lambda x: dict(zip(df_canonical.columns, x.tolist())), axis=1)
     canonical = dict(zip(df_canonical.index, df_canonical.dictionary))
-    
+
     # Messy dataset
     df_messy = clean_punctuation(messy_data)
     df_messy.rename(columns={field_properties: common_name}, inplace=True)
-    specify_type(df_messy, [common_name])                
+    specify_type(df_messy, [common_name])
 
     df_messy['dictionary'] = df_messy.apply(
         lambda x: dict(zip(df_messy.columns, x.tolist())), axis=1)
     messy = dict(zip(df_messy.index, df_messy.dictionary))
-    
+
     # Train or load the model
     deduper = _train(settings_file, training_file, canonical, messy, common_name,
                      sample_size, update_model, n_cores)
-    
+
     # Cluster the records
     clustered_df = _cluster(deduper, canonical, messy, threshold, canonicalize)
     results = messy_data.join(clustered_df, how='left')
