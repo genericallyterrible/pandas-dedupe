@@ -10,16 +10,13 @@ def trim(x):
 
 
 def clean_punctuation(df):
-    for i in df.columns:
-        df[i] = df[i].astype(str) 
-    df = df.applymap(lambda x: x.lower())
-    for i in df.columns:
-        df[i] = df[i].str.replace('[^\w\s\.\-\(\)\,\:\/\\\\]','')
-    df = df.applymap(lambda x: trim(x))
-    df = df.applymap(lambda x: unidecode(x))
-    for i in df.columns:
-        df[i] = df[i].replace({'nan': None, 'none': None, 'nat': None})
-    return df
+    return df.apply(
+        lambda series: series.astype(str)
+        .str.lower()
+        .str.replace(r"[^-\\.,:/()\w\s]", "")
+        .apply(lambda x: unidecode(trim(x)))
+        .replace({"nan": None, "none": None, "nat": None})
+    )
 
 def select_fields(fields, field_properties):
     for i in field_properties:
