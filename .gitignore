@@ -2,3 +2,6 @@
 .python-version
 *_learned_settings
 *_training.json
+*.egg-info/
+build/
+dist/
