@@ -20,7 +20,7 @@ def clean_punctuation(df):
 
 def select_fields(fields, field_properties):
     for i in field_properties:
-        if type(i) == str:
+        if isinstance(i, str):
             fields.append({'field': i, 'type': 'String'})
         elif len(i) == 2:
             fields.append({'field': i[0], 'type': i[1]})
@@ -34,7 +34,9 @@ def select_fields(fields, field_properties):
             elif i[2] == 'crf':
                 fields.append({'field': i[0], 'type': i[1], 'crf': True})
             else:
-                raise Exception(f"'{i[2]}' is not a valid field property")
+                raise ValueError("f{i} could not be maapped to field properties")
+        else:
+            raise ValueError("f{i} could not be maapped to field properties")
 
 
 def latlong_datatype(x):
@@ -53,14 +55,15 @@ def latlong_datatype(x):
 
 def specify_type(df, field_properties):
     for i in field_properties:
+        col_name = i[0]
         if i[1] == 'LatLong':
-            df[i[0]] = df[i[0]].apply(lambda x: latlong_datatype(x))
+            df[col_name] = df[col_name].apply(lambda x: latlong_datatype(x))
         elif i[1] == 'Price':
             try:
-                df[i[0]] = df[i[0]].str.replace(",","")
-                df[i[0]] = df[i[0]].replace({None: np.nan})
-                df[i[0]] = df[i[0]].astype(float)
-                df[i[0]] = df[i[0]].replace({np.nan: None})
+                df[col_name] = df[col_name].str.replace(",","")
+                df[col_name] = df[col_name].replace({None: np.nan})
+                df[col_name] = df[col_name].astype(float)
+                df[col_name] = df[col_name].replace({np.nan: None})
             except:
                 raise Exception('Make sure that Price columns can be converted to float.')
 
