@@ -236,21 +236,22 @@ def dedupe_dataframe(df, field_properties, canonicalize=False,
 
     print('Importing data ...')
 
-    df = clean_punctuation(df)
+    cols = [c if isinstance(c, str) else c[0] for c in field_properties]
+    data = df[cols]
 
-    specify_type(df, field_properties)
+    data = clean_punctuation(data)
 
-    df['dictionary'] = df.apply(
-        lambda x: dict(zip(df.columns, x.tolist())), axis=1)
-    data_d = dict(zip(df.index, df.dictionary))
+    specify_type(data, field_properties)
+
+    d = data.apply(lambda x: dict(zip(data.columns, x.tolist())), axis=1)
+    data_d = dict(zip(data.index, d))
 
     # Train or load the model
     deduper = _train(settings_file, training_file, data_d, field_properties,
                      sample_size, update_model, n_cores)
 
     # Cluster the records
-    clustered_df = _cluster(deduper, data_d, threshold, canonicalize)
-    results = df.join(clustered_df, how='left')
-    results.drop(['dictionary'], axis=1, inplace=True)
+    clustered_data = _cluster(deduper, data_d, threshold, canonicalize)
+    results = df.join(clustered_data, how='left')
 
     return results
